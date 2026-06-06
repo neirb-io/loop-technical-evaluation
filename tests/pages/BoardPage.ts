@@ -28,6 +28,9 @@ export class BoardPage {
   }
 
   getTaskTags(taskCard: Locator): Locator {
-    return taskCard.locator('xpath=.//p/following-sibling::div[1]/span');
+    return taskCard.locator('div').filter({
+      has: this.page.locator('span'),
+      hasNot: this.page.locator('svg'),
+    }).locator('span');
   }
 }
