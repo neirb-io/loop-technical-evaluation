@@ -28,6 +28,6 @@ export class BoardPage {
   }
 
   getTaskTags(taskCard: Locator): Locator {
-    return taskCard.locator('span');
+    return taskCard.locator('xpath=.//p/following-sibling::div[1]/span');
   }
 }

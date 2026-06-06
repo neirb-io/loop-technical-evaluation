@@ -10,23 +10,42 @@ type TestCase = {
   tags: string[];
 };
 
+type TestData = {
+  url: string;
+  credentials: {
+    username: string;
+    password: string;
+  };
+  testCases: TestCase[];
+};
+
 test.describe('Board task verification', () => {
+  const data: TestData = testData;
   test.beforeEach(async ({ page }) => {
-    await page.goto(testData.url);
+    await page.goto(data.url);
     const loginPage = new LoginPage(page);
-    await loginPage.login(testData.credentials.username, testData.credentials.password);
+    await loginPage.login(data.credentials.username, data.credentials.password);
   });
 
-  for (const { project, task, column, tags } of testData.testCases as TestCase[]) {
+  for (const { project, task, column, tags } of data.testCases as TestCase[]) {
     test(`[${project}] "${task}" is in "${column}" with tags: ${tags.join(', ')}`, async ({ page }) => {
       const boardPage = new BoardPage(page);
-      await boardPage.navigateToProject(project);
 
-      const taskCard = boardPage.getTaskCardInColumn(column, task);
-      await expect(taskCard).toBeVisible();
+      await test.step(`Navigate to project: ${project}`, async () => {
+        await boardPage.navigateToProject(project);
+      });
 
-      const taskTags = boardPage.getTaskTags(taskCard);
-      await expect(taskTags).toContainText(tags);
+      const taskCard = await test.step(`Verify "${task}" is in "${column}" column`, async () => {
+        const card = boardPage.getTaskCardInColumn(column, task);
+        await expect(card).toBeVisible();
+        return card;
+      });
+
+      await test.step(`Verify tags: ${tags.join(', ')}`, async () => {
+        const taskTags = boardPage.getTaskTags(taskCard);
+        await expect(taskTags).toHaveCount(tags.length);
+        await expect(taskTags).toHaveText(tags);
+      });
     });
   }
 });
