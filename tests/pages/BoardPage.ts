@@ -20,7 +20,10 @@ export class BoardPage {
 
   getTaskCardInColumn(columnName: string, taskTitle: string): Locator {
     return this.getColumn(columnName)
-      .locator('h3', { hasText: taskTitle })
+      .getByRole('heading', {
+        level: 3,
+        name: taskTitle
+      })
       .locator('xpath=..');
   }
 
